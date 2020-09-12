@@ -1,0 +1,52 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit category</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/app.css">
+    <script src="/app.js"></script>
+  </head>
+  <body>
+    <b>EDIT CATEGORY:</b><br />
+  <form id="form_category" action="">
+    ID: <input type="text" name="category_id" id="category_id" disabled>
+    title: <input type="text" name="category_title" id="category_title">
+    position: <input type="text" name="category_position" id="category_position">
+    Type: <select id="category_type">
+    <option value="1">Normal</option>
+    <option value="2">List</option>
+    </select>
+    <button onclick="window.history.back()">Back</button> <input type="submit" value="Save"><br />
+  </form>
+    <script>
+      $(document).ready(function() {
+        var idCategory = window.location.pathname.split("/").pop();
+        $.get("https://maze-low-hosta.glitch.me/category/" + idCategory, function(data, status){
+          var jsonData = JSON.parse(data);
+          $('#category_id').val(jsonData[0].id);
+          $('#category_title').val(jsonData[0].title);
+          $('#category_position').val(jsonData[0].position);
+          $("#category_type").val(jsonData[0].type);
+        });
+      });
+      $("#form_category").submit(function(e){
+        e.preventDefault();
+        var jsonPost = {id: $('#category_id').val(),
+                        title: $('#category_title').val(),
+                        position:$('#category_position').val(),
+                        type:$('#category_type').val()
+                       };
+        $.post("https://maze-low-hosta.glitch.me/category/edit", jsonPost, function(result){
+            document.location.href='/admin';
+        });
+      });
+    </script>
+  </body>
+</html>
+
+

@@ -1,0 +1,192 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/app.css">
+    <script src="/app.js"></script>
+  </head>
+  <body>
+    <hr />
+    <a href="/logout">LOGOUT</a>
+    <hr />
+    <b>IMPORT DATABASE</b> <br />
+    <form id="form_upload" action="" enctype="multipart/form-data">
+     <input type="file" id="form_upload_file" name="form_upload_file">
+     <input type="submit" value="Upload">
+   </form>
+    <hr />
+    <b>BACKUP DATABASE</b><br />
+    <a href="/backup">BACKUP</a>
+    <hr />
+    <b>CREATE CATEGORY:</b><br />
+  <form id="form_category" action="">
+    title: <input type="text" name="category_title" id="category_title">
+    Type: <select id="category_type">
+    <option value="1">Normal</option>
+    <option value="2">List</option>
+    </select>
+    <input type="submit" value="Submit"><br />
+  </form>
+    <div id="category"></div>
+    <hr />
+    <b>CREATE EXTERNAL LINK:</b><br />
+  <form id="form_news" action="">
+    link: <input type="text" name="news_link" id="news_link"> 
+    title: <input type="text" name="news_title" id="news_title">
+    category: <select id="news_category" name="news_category"></select>
+    color: <select id="news_style" name="news_style">
+    <option value="1">Black</option>
+    <option value="2">Blue</option>
+    <option value="3">Green</option>
+    <option value="4">Red</option>
+    <option value="5">Purple</option>
+    </select>
+    Bold<input type="checkbox" name="news_style_bold" id="news_style_bold" />
+    <input type="submit" value="Submit">
+  </form>
+    <hr />
+    <b>CREATE ARTICLE:</b><br />
+  <form id="form_article" action="">
+    title: <input type="text" id="article_title">
+    content: <textarea id="article_content" rows="4" cols="50"></textarea>
+    category: <select id="article_category"></select>
+    color: <select id="article_style">
+    <option value="1">Black</option>
+    <option value="2">Blue</option>
+    <option value="3">Green</option>
+    <option value="4">Red</option>
+    <option value="5">Purple</option>
+    </select>
+    Bold<input type="checkbox" id="article_style_bold" />
+    Show<input type="radio" name="article_publish" value="1" checked>hide<input type="radio" name="article_publish" value="0">
+    <input type="submit" value="Add Article">
+  </form> 
+    <hr />
+    <div id="sort_news"></div>
+    <hr />
+    <b>CONTENTS</b>
+    <div id="stories"></div>
+    <hr />
+    <script>
+    $(document).ready(function() {
+        getAdminCategory();
+        getAdminStories();
+    });
+    $("#form_upload").submit(function(e) {
+        e.preventDefault();
+        var fileToUpload = $('#form_upload_file').prop('files')[0];
+        var fileReader = new FileReader();
+        fileReader.onload = function() {
+            var data = fileReader.result;
+            $.post("https://maze-low-hosta.glitch.me/upload", { data: data }, function(result) {
+              console.log(result);
+                getAdminStories();
+            });
+        };
+        fileReader.readAsText(fileToUpload);
+    });
+    $('#sort_news').on('click', '.sort_by', function() {
+        var categoryID = $(this).data('id');
+        var urlStories = "https://maze-low-hosta.glitch.me/stories/admin";
+        if (categoryID != "0") {
+            urlStories = "https://maze-low-hosta.glitch.me/stories/" + categoryID + "/admin";
+        }
+        $.get(urlStories, function(data, status) {
+            var jsonData = JSON.parse(data);
+            renderAdminStories(jsonData);
+        });
+    });
+    
+    ////////
+    //  STORIES
+    ////////
+    $("#form_news").submit(function(e) {
+        e.preventDefault();
+        var jsonPost = {
+            link: $('#news_link').val(),
+            title: $('#news_title').val(),
+            category: $('#news_category').val(),
+            publish: 1,
+            timestamp: Math.round(+new Date() / 1000),
+            style: $('#news_style').val() + ($('#news_style_bold').is(":checked") ? 1 : 0)
+        };
+        $.post("https://maze-low-hosta.glitch.me/stories/add", jsonPost, function(result) {
+            $('#news_link').val('');
+            $('#news_title').val('');
+            getAdminStories();
+        });
+    });
+    $("#form_article").submit(function(e) {
+        e.preventDefault();
+        var jsonPost = {
+            title: $('#article_title').val(),
+            content: $('#article_content').val(),
+            category: $('#article_category').val(),
+            publish: $("input[name='article_publish']:checked").val(),
+            timestamp: Math.round(+new Date() / 1000),
+            style: $('#article_style').val() + ($('#article_style_bold').is(":checked") ? 1 : 0)
+        };
+        $.post("https://maze-low-hosta.glitch.me/stories/add", jsonPost, function(result) {
+            $('#article_title').val('');
+            $('#article_content').val('');
+            $("input[name=article_publish]").val(['1']);
+            getAdminStories();
+        });
+    });
+    $('#stories').on('click', '.remove', function() {
+        var storieID = $(this).data('id');
+        $.post("https://maze-low-hosta.glitch.me/stories/remove", {
+            id: storieID
+        }, function(result) {
+            getAdminStories();
+        });
+    });
+    $('#stories').on('click', '.edit', function() {
+        var storieID = $(this).data('id');
+        document.location.href = '/edit/story/' + storieID;
+    });
+    $('#stories').on('click', '.publish', function() {
+        var button = $(this);
+        var storieID = button.data('id');
+        var publish = button.text() == "Show" ? 1 : 0;
+        $.post("https://maze-low-hosta.glitch.me/stories/publish", {
+            id: storieID,
+            publish: publish
+        }, function(result) {
+            button.text(publish ? "Hide" : "Show");
+        });
+    });
+
+    /////////
+    //  CATEGORY
+    /////////
+    $("#form_category").submit(function(e) {
+        e.preventDefault();
+        var title = $('#category_title').val();
+        var type = $('#category_type').val();
+        $.post("https://maze-low-hosta.glitch.me/category/add", { title: title, position: 0, type: type }, function(result) {
+          $('#category_title').val('');
+            getAdminCategory();
+        });
+    });
+    $('#category').on('click', '.remove', function() {
+        var categoryID = $(this).data('id');
+        $.post("https://maze-low-hosta.glitch.me/category/remove", { id: categoryID }, function(result) {
+            getAdminCategory();
+        });
+    });
+    $('#category').on('click', '.edit', function() {
+        var categoryID = $(this).data('id');
+        document.location.href = '/edit/category/' + categoryID;
+    });
+    </script>
+    
+  </body>
+</html>
+

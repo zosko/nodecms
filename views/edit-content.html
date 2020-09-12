@@ -1,0 +1,99 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Edit content</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/app.css">
+    <script src="/app.js"></script>
+  </head>
+  <body>
+    <b>EDIT ARTICLE:</b><br />
+  <form id="form_storie" action="">
+    ID: <input type="text" name="storie_id" id="storie_id" disabled><br />
+    title: <input type="text" name="storie_title" id="storie_title"><br />
+    link: <input type="text" name="storie_link" id="storie_link"><br />
+    content: <textarea id="storie_content" name="storie_content" rows="4" cols="50"></textarea><br />
+    category: <select id="storie_category" name="storie_category"></select><br />
+    datetime: <input type="text" name="storie_date" id="storie_date"><br />
+    color: <select id="storie_style" name="storie_style">
+    <option value="1">Black</option>
+    <option value="2">Blue</option>
+    <option value="3">Green</option>
+    <option value="4">Red</option>
+    <option value="5">Purple</option>
+    </select>
+    Bold<input type="checkbox" name="storie_style_bold" id="storie_style_bold" /><br />
+    Story show<input type="radio" name="storie_publish" value="1" checked>hide<input type="radio" name="storie_publish" value="0"><br />
+    <button onclick="window.history.back()">Back</button> <input type="submit" value="Save">
+  </form> 
+    <script>
+      var catID = 0;
+      var isStory = false;
+      $(document).ready(function() {
+        var idArticle = window.location.pathname.split("/").pop();
+        $.get("https://maze-low-hosta.glitch.me/article/content/" + idArticle, function(data, status){
+          var jsonData = JSON.parse(data);
+          $('#storie_id').val(jsonData[0].id);
+          $('#storie_title').val(jsonData[0].title);
+          $('#storie_link').val(jsonData[0].link);
+          $('#storie_content').html(jsonData[0].content);
+          $('#storie_date').val(getFormatDate(jsonData[0].timestamp));
+          $("input[name=storie_publish]").val([jsonData[0].publish]);
+          
+          var color = parseInt(jsonData[0].style / 10,10); 
+          var bold = jsonData[0].style % 10;
+          
+          $('#storie_style').val(color);
+          $("#storie_style_bold").prop("checked",bold);
+          
+          catID = jsonData[0].category;
+          
+          if (jsonData[0].link == null) {
+            $('#storie_link').attr('disabled','disabled');
+            isStory = true
+          }
+          else{
+            $('#storie_content').attr('disabled','disabled');
+            isStory = false
+          }
+          
+          getCategory();
+        });
+      });
+      function getCategory(){
+        $.get("https://maze-low-hosta.glitch.me/category", function(data, status){
+          var jsonData = JSON.parse(data);
+          $('#storie_category').empty();
+          $(jsonData).each(function(index, el) {
+            $('#storie_category').append($('<option></option>').val(el.id).text(el.title)); 
+          });
+          $('#storie_category').val(catID);
+        });
+      }
+      $("#form_storie").submit(function(e){
+        e.preventDefault();
+        
+        var jsonPost = {id: $('#storie_id').val(),
+                        title: $('#storie_title').val(),
+                        link: isStory ? undefined : $('#storie_link').val(),
+                        content:isStory ? $('#storie_content').val() : undefined,
+                        category:$('#storie_category').val(),
+                        publish:$("input[name='storie_publish']:checked").val(),
+                        timestamp:getTimestamp($('#storie_date').val()),
+                        style:$('#storie_style').val() + ($('#storie_style_bold').is(":checked") ? 1 : 0)
+                       };
+        $.post("https://maze-low-hosta.glitch.me/stories/edit", jsonPost, function(result){
+            document.location.href='/admin';
+        });
+      });
+    </script>
+    
+  </body>
+</html>
+
+

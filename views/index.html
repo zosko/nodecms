@@ -1,0 +1,27 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>News</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/app.css">
+    <script src="/app.js"></script>
+  </head>
+  <body>
+    <center><a href="/"><img src="https://cdn.glitch.com/d0d30f2a-f73b-4b58-8bb0-86b859b852a6%2Funnamed.png?v=1599328256969" /></a></center>
+    <hr />
+    <div id="menu"></div>
+    <hr />
+    <div id="stories"></div>
+    <script>
+      $(document).ready(function() {
+        getFrontMenu();
+        getFrontPageStories();
+      });
+    </script>
+  </body>
+</html>
