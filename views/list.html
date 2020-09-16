@@ -26,7 +26,7 @@
           var jsonData = JSON.parse(data);
           $("#articles").html('');
           $(jsonData).each(function(index, el) {
-            $("#articles").append('<p><h2>'+el.title+'</h2>'+(el.content ? el.content : '<a href="'+el.link+'" target="_blank">'+el.title+'</a>')+'</p><hr />');
+            $("#articles").append('<p>'+(el.content ? '<h1>'+ el.title +'</h1>' : '' ) + (el.content ? el.content : '<a href="'+el.link+'" target="_blank">'+el.title+'</a>')+'</p><hr />');
           });
         });
       });

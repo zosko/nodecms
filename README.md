@@ -1,2 +1,1 @@
-# SimpleCMS
-SimpleCMS
+Simple CMS

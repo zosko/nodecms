@@ -36,7 +36,7 @@
       var isStory = false;
       $(document).ready(function() {
         var idArticle = window.location.pathname.split("/").pop();
-        $.get("https://maze-low-hosta.glitch.me/article/content/" + idArticle, function(data, status){
+        $.post("https://maze-low-hosta.glitch.me/article/" + idArticle, function(data, status){
           var jsonData = JSON.parse(data);
           $('#storie_id').val(jsonData[0].id);
           $('#storie_title').val(jsonData[0].title);
