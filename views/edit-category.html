@@ -12,6 +12,7 @@
     <script src="/app.js"></script>
   </head>
   <body>
+    <script data-ad-client="ca-pub-3657038347227759" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <b>EDIT CATEGORY:</b><br />
   <form id="form_category" action="">
     ID: <input type="text" name="category_id" id="category_id" disabled>
@@ -26,7 +27,7 @@
     <script>
       $(document).ready(function() {
         var idCategory = window.location.pathname.split("/").pop();
-        $.get("https://maze-low-hosta.glitch.me/category/" + idCategory, function(data, status){
+        $.get("/category/" + idCategory, function(data, status){
           var jsonData = JSON.parse(data);
           $('#category_id').val(jsonData[0].id);
           $('#category_title').val(jsonData[0].title);
@@ -41,7 +42,7 @@
                         position:$('#category_position').val(),
                         type:$('#category_type').val()
                        };
-        $.post("https://maze-low-hosta.glitch.me/category/edit", jsonPost, function(result){
+        $.post("/category/edit", jsonPost, function(result){
             document.location.href='/admin';
         });
       });

@@ -19,7 +19,7 @@ function getStyle(style) {
   return ("style=color:" + colors[color] + ";font-weight:" + (bold == 1 ? "bold" : "normal") + ";");
 }
 function getFrontMenu() {
-  $.get("https://maze-low-hosta.glitch.me/category", function(data, status) {
+  $.get("/category", function(data, status) {
     var jsonData = JSON.parse(data);
     $("#menu").html('<a href="/">All News</a> |');
     $(jsonData).each(function(index, el) {
@@ -36,7 +36,7 @@ function renderFrontPageStories(jsonData){
     });
 }
 function getFrontPageStories() {
-  $.get("https://maze-low-hosta.glitch.me/stories", function(data, status) {
+  $.get("/stories", function(data, status) {
     var jsonData = JSON.parse(data);
     renderFrontPageStories(jsonData);
   });
@@ -77,13 +77,13 @@ function renderAdminStories(jsonData){
     });
 }
 function getAdminStories() {
-  $.get("https://maze-low-hosta.glitch.me/stories/admin", function(data,status) {
+  $.get("/stories/admin", function(data,status) {
     var jsonData = JSON.parse(data);
     renderAdminStories(jsonData);
   });
 }
 function getAdminCategory() {
-  $.get("https://maze-low-hosta.glitch.me/category", function(data, status) {
+  $.get("/category", function(data, status) {
     var jsonData = JSON.parse(data);
     $("#category").html("");
     $("#news_category").empty();

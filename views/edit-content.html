@@ -12,6 +12,7 @@
     <script src="/app.js"></script>
   </head>
   <body>
+    <script data-ad-client="ca-pub-3657038347227759" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <b>EDIT ARTICLE:</b><br />
   <form id="form_storie" action="">
     ID: <input type="text" name="storie_id" id="storie_id" disabled><br />
@@ -36,7 +37,7 @@
       var isStory = false;
       $(document).ready(function() {
         var idArticle = window.location.pathname.split("/").pop();
-        $.post("https://maze-low-hosta.glitch.me/article/" + idArticle, function(data, status){
+        $.post("/article/" + idArticle, function(data, status){
           var jsonData = JSON.parse(data);
           $('#storie_id').val(jsonData[0].id);
           $('#storie_title').val(jsonData[0].title);
@@ -66,7 +67,7 @@
         });
       });
       function getCategory(){
-        $.get("https://maze-low-hosta.glitch.me/category", function(data, status){
+        $.get("/category", function(data, status){
           var jsonData = JSON.parse(data);
           $('#storie_category').empty();
           $(jsonData).each(function(index, el) {
@@ -87,7 +88,7 @@
                         timestamp:getTimestamp($('#storie_date').val()),
                         style:$('#storie_style').val() + ($('#storie_style_bold').is(":checked") ? 1 : 0)
                        };
-        $.post("https://maze-low-hosta.glitch.me/stories/edit", jsonPost, function(result){
+        $.post("/stories/edit", jsonPost, function(result){
             document.location.href='/admin';
         });
       });

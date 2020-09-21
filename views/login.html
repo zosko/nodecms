@@ -12,6 +12,7 @@
     <script src="/app.js"></script>
   </head>
   <body>
+  <script data-ad-client="ca-pub-3657038347227759" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
   <form id="form_login" action="">
     password: <input type="text" name="password" id="password">
     <input type="submit" value="Login">
@@ -22,7 +23,7 @@
         var jsonPost = { 
           password: $('#password').val()
         };
-        $.post("https://maze-low-hosta.glitch.me/login", jsonPost, function(result){
+        $.post("/login", jsonPost, function(result){
             document.location.href='/admin';
         });
       });

@@ -12,6 +12,7 @@
     <script src="/app.js"></script>
   </head>
   <body>
+    <script data-ad-client="ca-pub-3657038347227759" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <hr />
     <a href="/logout">LOGOUT</a>
     <hr />
@@ -84,7 +85,7 @@
         var fileReader = new FileReader();
         fileReader.onload = function() {
             var data = fileReader.result;
-            $.post("https://maze-low-hosta.glitch.me/upload", { data: data }, function(result) {
+            $.post("/upload", { data: data }, function(result) {
               console.log(result);
                 getAdminStories();
             });
@@ -93,9 +94,9 @@
     });
     $('#sort_news').on('click', '.sort_by', function() {
         var categoryID = $(this).data('id');
-        var urlStories = "https://maze-low-hosta.glitch.me/stories/admin";
+        var urlStories = "/stories/admin";
         if (categoryID != "0") {
-            urlStories = "https://maze-low-hosta.glitch.me/stories/" + categoryID + "/admin";
+            urlStories = "/stories/" + categoryID + "/admin";
         }
         $.get(urlStories, function(data, status) {
             var jsonData = JSON.parse(data);
@@ -116,7 +117,7 @@
             timestamp: Math.round(+new Date() / 1000),
             style: $('#news_style').val() + ($('#news_style_bold').is(":checked") ? 1 : 0)
         };
-        $.post("https://maze-low-hosta.glitch.me/stories/add", jsonPost, function(result) {
+        $.post("/stories/add", jsonPost, function(result) {
             $('#news_link').val('');
             $('#news_title').val('');
             getAdminStories();
@@ -132,7 +133,7 @@
             timestamp: Math.round(+new Date() / 1000),
             style: $('#article_style').val() + ($('#article_style_bold').is(":checked") ? 1 : 0)
         };
-        $.post("https://maze-low-hosta.glitch.me/stories/add", jsonPost, function(result) {
+        $.post("/stories/add", jsonPost, function(result) {
             $('#article_title').val('');
             $('#article_content').val('');
             $("input[name=article_publish]").val(['1']);
@@ -141,7 +142,7 @@
     });
     $('#stories').on('click', '.remove', function() {
         var storieID = $(this).data('id');
-        $.post("https://maze-low-hosta.glitch.me/stories/remove", {
+        $.post("/stories/remove", {
             id: storieID
         }, function(result) {
             getAdminStories();
@@ -155,7 +156,7 @@
         var button = $(this);
         var storieID = button.data('id');
         var publish = button.text() == "Show" ? 1 : 0;
-        $.post("https://maze-low-hosta.glitch.me/stories/publish", {
+        $.post("/stories/publish", {
             id: storieID,
             publish: publish
         }, function(result) {
@@ -170,14 +171,14 @@
         e.preventDefault();
         var title = $('#category_title').val();
         var type = $('#category_type').val();
-        $.post("https://maze-low-hosta.glitch.me/category/add", { title: title, position: 0, type: type }, function(result) {
+        $.post("/category/add", { title: title, position: 0, type: type }, function(result) {
           $('#category_title').val('');
             getAdminCategory();
         });
     });
     $('#category').on('click', '.remove', function() {
         var categoryID = $(this).data('id');
-        $.post("https://maze-low-hosta.glitch.me/category/remove", { id: categoryID }, function(result) {
+        $.post("/category/remove", { id: categoryID }, function(result) {
             getAdminCategory();
         });
     });
