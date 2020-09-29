@@ -21,7 +21,8 @@ db.serialize(() => {
   if (!exists) {
     db.run("CREATE TABLE Categories (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, position INTEGER, type INTEGER)");
     db.run("INSERT INTO Categories (title,position,type) VALUES ('No Category',0,1)");
-    db.run("CREATE TABLE Articles (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, link TEXT, content TEXT, category INTEGER, publish INTEGER, timestamp INTEGER, style INTEGER)");
+    db.run("CREATE TABLE Articles (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, link TEXT, content TEXT, publish INTEGER, timestamp INTEGER, style INTEGER)");
+    db.run("CREATE TABLE Articles_Categories (id INTEGER PRIMARY KEY AUTOINCREMENT, id_article INTEGER, id_category INTEGER)");
     console.log("New tables created!");
   } else {
     console.log('Database good!');
@@ -84,7 +85,7 @@ app.get("/admin", (request, response) => {
 ////////
 app.post("/login", (request, response) => {
   const password = request.body.password;
-  if (password == "test123") {
+  if (password == "Ufycnvvf32fEsKJH") {
     request.session.logged = true;
   }
   response.send({message: "ok"});
@@ -102,10 +103,20 @@ app.get("/logout", (request, response) => {
 //  EDIT VIEWS
 ////////
 app.get("/edit/story/:id", (request, response) => {
-  response.sendFile(`${__dirname}/views/edit-content.html`);
+  if (request.session.logged){
+    response.sendFile(`${__dirname}/views/edit-content.html`);
+  }
+  else{
+    response.sendFile(`${__dirname}/views/login.html`);
+  }
 });
 app.get("/edit/category/:id", (request, response) => {
-  response.sendFile(`${__dirname}/views/edit-category.html`);
+  if (request.session.logged){
+    response.sendFile(`${__dirname}/views/edit-category.html`);
+  }
+  else{
+    response.sendFile(`${__dirname}/views/login.html`);
+  }
 });
 
 ////////
@@ -129,7 +140,7 @@ app.get("/page/:id", (request, response) => {
 });
 app.post("/page/:id", (request, response) => {
   var idCategory = request.params.id;
-  db.all("SELECT * from Articles WHERE category == ?", idCategory , (err, rows) => {
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -141,8 +152,8 @@ app.get("/list/:id", (request, response) => {
   response.sendFile(`${__dirname}/views/list.html`);
 });
 app.post("/list/:id", (request, response) => {
-  var idStorie = request.params.id;
-  db.all("SELECT * from Articles WHERE category == ?", idStorie , (err, rows) => {
+  var idCategory = request.params.id;
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -157,7 +168,7 @@ app.get("/stories/admin", (request, response) => {
 });
 app.get("/stories/:category/admin", (request, response) => {
   var category = request.params.category;
-  db.all("SELECT * from Articles WHERE category == ? ORDER BY id DESC",category, (err, rows) => {
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC",category, (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -168,7 +179,7 @@ app.get("/stories", (request, response) => {
 });
 app.get("/stories/:category", (request, response) => {
   var category = request.params.category;
-  db.all("SELECT * from Articles WHERE category == ? AND publish = 1 ORDER BY timestamp DESC",category, (err, rows) => {
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles_Categories.id_category = ? AND Articles.publish = 1 ORDER BY Articles.timestamp DESC",category, (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -176,14 +187,20 @@ app.post("/stories/add", (request, response) => {
   const title = request.body.title;
   const link = request.body.link;
   const content = request.body.content;
-  const category = request.body.category;
+  const categories = request.body.category;
   const publish = request.body.publish;
   const timestamp = request.body.timestamp;
   const style = request.body.style;
-  db.run(`INSERT INTO Articles (title,link,content,category,publish,timestamp,style) VALUES (?,?,?,?,?,?,?)`, [title,link,content,category,publish,timestamp,style], error => {
+  db.run(`INSERT INTO Articles (title,link,content,publish,timestamp,style) VALUES (?,?,?,?,?,?)`, [title,link,content,publish,timestamp,style], function (error) {
     if (error) {
       response.send({ message: "error!" });
     } else {
+      var lastIndex = this.lastID;
+      categories.forEach(function(element) {
+        db.run(`INSERT INTO Articles_Categories (id_article,id_category) VALUES (?,?)`, [lastIndex,element], error => {
+          if (error) { console.log("error forearch"); } 
+        });
+      });
       response.send({ message: "success" });
     }
   });
@@ -194,7 +211,13 @@ app.post("/stories/remove", (request, response) => {
     if (error) {
       response.send({ message: "error!" });
     } else {
-      response.send({ message: "success" });
+      db.run(`DELETE FROM Articles_Categories WHERE id_article = ?`, idStorie, error => {
+        if (error) {
+          response.send({ message: "error!" });
+        } else {
+          response.send({ message: "success" });
+        }
+      });
     }
   });
 });
@@ -203,15 +226,26 @@ app.post("/stories/edit", (request, response) => {
   const title = request.body.title;
   const link = request.body.link;
   const content = request.body.content;
-  const category = request.body.category;
+  const categories = request.body.categories;
   const publish = request.body.publish;
   const timestamp = request.body.timestamp;
   const style = request.body.style;
-  db.run(`UPDATE Articles SET title = ?, link = ?, content = ?, category = ?, publish = ?, timestamp = ?, style = ? WHERE id = ?`, [title,link,content,category,publish,timestamp,style,idStorie], error => {
+  db.run(`UPDATE Articles SET title = ?, link = ?, content = ?, publish = ?, timestamp = ?, style = ? WHERE id = ?`, [title,link,content,publish,timestamp,style,idStorie], function (error) {
     if (error) {
       response.send({ message: "error!" });
     } else {
-      response.send({ message: "success" });
+      db.run(`DELETE FROM Articles_Categories WHERE id_article = ?`, idStorie, error => {
+        if (error) {
+          response.send({ message: "error!" });
+        } else {
+          categories.forEach(function(element) {
+            db.run(`INSERT INTO Articles_Categories (id_article,id_category) VALUES (?,?)`, [idStorie,element], error => {
+              if (error) { console.log("error forearch"); } 
+            });
+          });
+          response.send({ message: "success" });
+        }
+      });
     }
   });
 });
@@ -224,6 +258,12 @@ app.post("/stories/publish", (request, response) => {
     } else {
       response.send({ message: "success" });
     }
+  });
+});
+app.get("/stories/category/:id", (request, response) => {
+  var id_article = request.params.id;
+  db.all("SELECT * from Articles_Categories WHERE id_article = ?",[id_article], (err, rows) => {
+    response.send(JSON.stringify(rows));
   });
 });
 

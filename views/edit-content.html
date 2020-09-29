@@ -12,28 +12,26 @@
     <script src="/app.js"></script>
   </head>
   <body>
-    <script data-ad-client="ca-pub-3657038347227759" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
-    <b>EDIT ARTICLE:</b><br />
+    <center><b>EDIT ARTICLE</b></center><br />
   <form id="form_storie" action="">
-    ID: <input type="text" name="storie_id" id="storie_id" disabled><br />
-    title: <input type="text" name="storie_title" id="storie_title"><br />
-    link: <input type="text" name="storie_link" id="storie_link"><br />
-    content: <textarea id="storie_content" name="storie_content" rows="4" cols="50"></textarea><br />
-    category: <select id="storie_category" name="storie_category"></select><br />
-    datetime: <input type="text" name="storie_date" id="storie_date"><br />
-    color: <select id="storie_style" name="storie_style">
+    <b>ID:</b> <input type="text" name="storie_id" id="storie_id" disabled><br />
+    <b>TITLE:</b> <input type="text" name="storie_title" id="storie_title"><br />
+    <b>LINK:</b> <input type="text" name="storie_link" id="storie_link"><br />
+    <b>CONTENT:</b> <textarea id="storie_content" name="storie_content" rows="4" cols="50"></textarea><br />
+    <b>CATEGORY:</b> <span id="article_category"></span><br />
+    <b>DATETIME:</b> <input type="text" name="storie_date" id="storie_date"><br />
+    <b>COLOR:</b> <select id="storie_style" name="storie_style">
     <option value="1">Black</option>
     <option value="2">Blue</option>
     <option value="3">Green</option>
     <option value="4">Red</option>
     <option value="5">Purple</option>
-    </select>
-    Bold<input type="checkbox" name="storie_style_bold" id="storie_style_bold" /><br />
-    Story show<input type="radio" name="storie_publish" value="1" checked>hide<input type="radio" name="storie_publish" value="0"><br />
+    </select><br />
+    <b>BOLD</b><input type="checkbox" name="storie_style_bold" id="storie_style_bold" /><br />
+    <b>STORY</b> show<input type="radio" name="storie_publish" value="1" checked>hide<input type="radio" name="storie_publish" value="0"><br />
     <button onclick="window.history.back()">Back</button> <input type="submit" value="Save">
   </form> 
     <script>
-      var catID = 0;
       var isStory = false;
       $(document).ready(function() {
         var idArticle = window.location.pathname.split("/").pop();
@@ -52,8 +50,6 @@
           $('#storie_style').val(color);
           $("#storie_style_bold").prop("checked",bold);
           
-          catID = jsonData[0].category;
-          
           if (jsonData[0].link == null) {
             $('#storie_link').attr('disabled','disabled');
             isStory = true
@@ -63,29 +59,38 @@
             isStory = false
           }
           
-          getCategory();
+          getAdminCategory();
+          getCategoriesForArticle(idArticle);
         });
       });
-      function getCategory(){
-        $.get("/category", function(data, status){
-          var jsonData = JSON.parse(data);
-          $('#storie_category').empty();
+      function getCategoriesForArticle(id_article){
+        $.get("/stories/category/"+id_article,function(result){
+          var jsonData = JSON.parse(result);
           $(jsonData).each(function(index, el) {
-            $('#storie_category').append($('<option></option>').val(el.id).text(el.title)); 
+            var id_category = el.id_category;
+            $("input[name='article_category[]']").each(function (){
+              if (id_category == parseInt($(this).val())){
+                $(this).prop('checked',true);
+              }
+            });
           });
-          $('#storie_category').val(catID);
         });
       }
       $("#form_storie").submit(function(e){
         e.preventDefault();
         
+        var checked_category = []
+        $("input[name='article_category[]']:checked").each(function (){
+            checked_category.push(parseInt($(this).val()));
+        });
+
         var jsonPost = {id: $('#storie_id').val(),
                         title: $('#storie_title').val(),
                         link: isStory ? undefined : $('#storie_link').val(),
                         content:isStory ? $('#storie_content').val() : undefined,
-                        category:$('#storie_category').val(),
                         publish:$("input[name='storie_publish']:checked").val(),
                         timestamp:getTimestamp($('#storie_date').val()),
+                        categories: checked_category,
                         style:$('#storie_style').val() + ($('#storie_style_bold').is(":checked") ? 1 : 0)
                        };
         $.post("/stories/edit", jsonPost, function(result){

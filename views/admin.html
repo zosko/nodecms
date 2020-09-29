@@ -1,5 +1,3 @@
-<!-- This is a static file -->
-<!-- served from your routes in server.js -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -12,23 +10,22 @@
     <script src="/app.js"></script>
   </head>
   <body>
-    <script data-ad-client="ca-pub-3657038347227759" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
     <hr />
     <a href="/logout">LOGOUT</a>
     <hr />
-    <b>IMPORT DATABASE</b> <br />
+    <center><b>IMPORT DATABASE</b></center><br />
     <form id="form_upload" action="" enctype="multipart/form-data">
      <input type="file" id="form_upload_file" name="form_upload_file">
      <input type="submit" value="Upload">
    </form>
     <hr />
-    <b>BACKUP DATABASE</b><br />
-    <a href="/backup">BACKUP</a>
+    <center><b>BACKUP DATABASE</b></center><br />
+    <center><a href="/backup">BACKUP</a></center>
     <hr />
-    <b>CREATE CATEGORY:</b><br />
+    <center><b>CREATE CATEGORY</b></center><br />
   <form id="form_category" action="">
-    title: <input type="text" name="category_title" id="category_title">
-    Type: <select id="category_type">
+    <b>TITLE:</b> <input type="text" name="category_title" id="category_title">
+    <b>TYPE:</b> <select id="category_type">
     <option value="1">Normal</option>
     <option value="2">List</option>
     </select>
@@ -36,36 +33,35 @@
   </form>
     <div id="category"></div>
     <hr />
-    <b>CREATE EXTERNAL LINK:</b><br />
+    <center><b>CREATE EXTERNAL LINK</b></center><br />
   <form id="form_news" action="">
-    link: <input type="text" name="news_link" id="news_link"> 
-    title: <input type="text" name="news_title" id="news_title">
-    category: <select id="news_category" name="news_category"></select>
-    color: <select id="news_style" name="news_style">
+    <b>LINK:</b> <input type="text" name="news_link" id="news_link"> <br />
+    <b>TITLE:</b> <input type="text" name="news_title" id="news_title"><br />
+    <b>CATEGORY:</b> <span id="news_category" name="news_category"></span><br />
+    <b>COLOR:</b> <select id="news_style" name="news_style">
     <option value="1">Black</option>
     <option value="2">Blue</option>
     <option value="3">Green</option>
     <option value="4">Red</option>
     <option value="5">Purple</option>
-    </select>
-    Bold<input type="checkbox" name="news_style_bold" id="news_style_bold" />
+    </select><br />
+    <b>BOLD</b> <input type="checkbox" name="news_style_bold" id="news_style_bold" /><br />
     <input type="submit" value="Submit">
   </form>
     <hr />
-    <b>CREATE ARTICLE:</b><br />
+    <center><b>CREATE ARTICLE</b></center><br />
   <form id="form_article" action="">
-    title: <input type="text" id="article_title">
-    content: <textarea id="article_content" rows="4" cols="50"></textarea>
-    category: <select id="article_category"></select>
-    color: <select id="article_style">
+    <b>TITLE:</b> <input type="text" id="article_title"><br />
+    <b>CONTENT:</b> <textarea id="article_content" rows="4" cols="50"></textarea><br />
+    <b>CATEGORY:</b> <span id="article_category"></span><br />
+    <b>COLOR:</b> <select id="article_style"><br />
     <option value="1">Black</option>
     <option value="2">Blue</option>
     <option value="3">Green</option>
     <option value="4">Red</option>
     <option value="5">Purple</option>
-    </select>
-    Bold<input type="checkbox" id="article_style_bold" />
-    Show<input type="radio" name="article_publish" value="1" checked>hide<input type="radio" name="article_publish" value="0">
+    </select><br />
+    <b>BOLD</b> <input type="checkbox" id="article_style_bold" /><br />
     <input type="submit" value="Add Article">
   </form> 
     <hr />
@@ -109,10 +105,16 @@
     ////////
     $("#form_news").submit(function(e) {
         e.preventDefault();
+
+        var checked_category = []
+        $("input[name='news_category[]']:checked").each(function(){
+            checked_category.push(parseInt($(this).val()));
+        });
+
         var jsonPost = {
             link: $('#news_link').val(),
             title: $('#news_title').val(),
-            category: $('#news_category').val(),
+            category: checked_category,
             publish: 1,
             timestamp: Math.round(+new Date() / 1000),
             style: $('#news_style').val() + ($('#news_style_bold').is(":checked") ? 1 : 0)
@@ -124,19 +126,24 @@
         });
     });
     $("#form_article").submit(function(e) {
+
+        var checked_category = []
+        $("input[name='article_category[]']:checked").each(function (){
+            checked_category.push(parseInt($(this).val()));
+        });
+
         e.preventDefault();
         var jsonPost = {
             title: $('#article_title').val(),
             content: $('#article_content').val(),
-            category: $('#article_category').val(),
-            publish: $("input[name='article_publish']:checked").val(),
+            category: checked_category,
+            publish: 1,
             timestamp: Math.round(+new Date() / 1000),
             style: $('#article_style').val() + ($('#article_style_bold').is(":checked") ? 1 : 0)
         };
         $.post("/stories/add", jsonPost, function(result) {
             $('#article_title').val('');
             $('#article_content').val('');
-            $("input[name=article_publish]").val(['1']);
             getAdminStories();
         });
     });

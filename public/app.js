@@ -93,9 +93,9 @@ function getAdminCategory() {
       if (el.id != 1) {
         $("#category").append(('['+ ['','Normal','List'][el.type] +']') + '<button data-id="' + el.id + '" class="edit">Edit</button><button data-id="' + el.id + '" class="remove">Remove</button>' + el.title + "<br />");
       }
-      $("#article_category").append($("<option></option>").val(el.id).text(el.title));
-      $("#news_category").append($("<option></option>").val(el.id).text(el.title));
       $("#sort_news").append('<a href="#" data-id="' + el.id + '" class="sort_by"> ' + el.title + " </a> |");
+      $('#news_category').append(el.title + '<input type="checkbox" value="'+ el.id +'" name="news_category[]"> | '); 
+      $('#article_category').append(el.title + '<input type="checkbox" value="'+ el.id +'" name="article_category[]"> | '); 
     });
   });
 }
