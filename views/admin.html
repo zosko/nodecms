@@ -62,6 +62,7 @@
     <option value="5">Purple</option>
     </select><br />
     <b>BOLD</b> <input type="checkbox" id="article_style_bold" /><br />
+    <!-- <b>SHOW <input type="radio" name="article_publish" value="1" checked>HIDE<input type="radio" name="article_publish" value="0"><br /> -->
     <input type="submit" value="Add Article">
   </form> 
     <hr />
@@ -137,13 +138,14 @@
             title: $('#article_title').val(),
             content: $('#article_content').val(),
             category: checked_category,
-            publish: 1,
+            publish: 1, //$("input[name='article_publish']:checked").val(),
             timestamp: Math.round(+new Date() / 1000),
             style: $('#article_style').val() + ($('#article_style_bold').is(":checked") ? 1 : 0)
         };
         $.post("/stories/add", jsonPost, function(result) {
             $('#article_title').val('');
             $('#article_content').val('');
+            // $("input[name=article_publish]").val(['1']);
             getAdminStories();
         });
     });
