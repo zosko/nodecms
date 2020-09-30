@@ -7,7 +7,7 @@ const app = express();
 const fs = require("fs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(session({secret: 'ssshhhhh', saveUninitialized: true, resave: true}));
+app.use(session({secret: 'ssshhhhh tornado balance jogurt medal bamblbee sinalco', saveUninitialized: true, resave: true}));
 app.use(express.static("public"));
 
 // init sqlite db
@@ -33,36 +33,46 @@ db.serialize(() => {
 //  DATABASE BACKUP / IMPORT
 ///////////
 app.post("/upload", (request, response) => {
-  const sqlImport = request.body.data;
-  fs.writeFile('import.dump', sqlImport, function (err) {
-    if (err) {
-      response.send({ message: "error" })
-    }   
-    exec('rm '+ dbFile + '; sqlite3 '+dbFile+' < import.dump; refresh', (error, stdout, stderr) => {
-        if (error) {
-            response.send({ message: error.message });
-            return;
-        }
-        if (stderr) {
-          response.send({ message: stderr });
-            return;
-        }
-        response.send({ message: "success" });
-      });    
-  });
+  if (request.session.logged){
+    const sqlImport = request.body.data;
+    fs.writeFile('import.dump', sqlImport, function (err) {
+      if (err) {
+        response.send({ message: "error" })
+      }   
+      exec('rm '+ dbFile + '; sqlite3 '+dbFile+' < import.dump; refresh', (error, stdout, stderr) => {
+          if (error) {
+              response.send({ message: error.message });
+              return;
+          }
+          if (stderr) {
+            response.send({ message: stderr });
+              return;
+          }
+          response.send({ message: "success" });
+        });    
+    });
+  }
+  else{
+    response.sendFile(`${__dirname}/views/index.html`);
+  }
 });
 app.get("/backup", (request, response) => {
-  exec('sqlite3 '+dbFile+' .dump > backup.dump', (error, stdout, stderr) => {
-    if (error) {
-        response.send({ message: error.message });
-        return;
-    }
-    if (stderr) {
-      response.send({ message: stderr });
-        return;
-    }
-    response.download('backup.dump','backup.dump');
-  });
+  if (request.session.logged){
+    exec('sqlite3 '+dbFile+' .dump > backup.dump', (error, stdout, stderr) => {
+      if (error) {
+          response.send({ message: error.message });
+          return;
+      }
+      if (stderr) {
+        response.send({ message: stderr });
+          return;
+      }
+      response.download('backup.dump','backup.dump');
+    });
+  }
+  else{
+    response.sendFile(`${__dirname}/views/index.html`);
+  }
 });
 
 /////////
@@ -184,81 +194,101 @@ app.get("/stories/:category", (request, response) => {
   });
 });
 app.post("/stories/add", (request, response) => {  
-  const title = request.body.title;
-  const link = request.body.link;
-  const content = request.body.content;
-  const categories = request.body.category;
-  const publish = request.body.publish;
-  const timestamp = request.body.timestamp;
-  const style = request.body.style;
-  db.run(`INSERT INTO Articles (title,link,content,publish,timestamp,style) VALUES (?,?,?,?,?,?)`, [title,link,content,publish,timestamp,style], function (error) {
-    if (error) {
-      response.send({ message: "error!" });
-    } else {
-      var lastIndex = this.lastID;
-      categories.forEach(function(element) {
-        db.run(`INSERT INTO Articles_Categories (id_article,id_category) VALUES (?,?)`, [lastIndex,element], error => {
-          if (error) { console.log("error forearch"); } 
+  if (request.session.logged){
+    const title = request.body.title;
+    const link = request.body.link;
+    const content = request.body.content;
+    const categories = request.body.category;
+    const publish = request.body.publish;
+    const timestamp = request.body.timestamp;
+    const style = request.body.style;
+    db.run(`INSERT INTO Articles (title,link,content,publish,timestamp,style) VALUES (?,?,?,?,?,?)`, [title,link,content,publish,timestamp,style], function (error) {
+      if (error) {
+        response.send({ message: "error!" });
+      } else {
+        var lastIndex = this.lastID;
+        categories.forEach(function(element) {
+          db.run(`INSERT INTO Articles_Categories (id_article,id_category) VALUES (?,?)`, [lastIndex,element], error => {
+            if (error) { console.log("error forearch"); } 
+          });
         });
-      });
-      response.send({ message: "success" });
-    }
-  });
+        response.send({ message: "success" });
+      }
+    });
+  }
+  else{
+      response.send({ message: "fail" });
+  }
 });
 app.post("/stories/remove", (request, response) => {
-  const idStorie = request.body.id;
-  db.run(`DELETE FROM Articles WHERE id = ?`, idStorie, error => {
-    if (error) {
-      response.send({ message: "error!" });
-    } else {
-      db.run(`DELETE FROM Articles_Categories WHERE id_article = ?`, idStorie, error => {
-        if (error) {
-          response.send({ message: "error!" });
-        } else {
-          response.send({ message: "success" });
-        }
-      });
-    }
-  });
+  if (request.session.logged){
+    const idStorie = request.body.id;
+    db.run(`DELETE FROM Articles WHERE id = ?`, idStorie, error => {
+      if (error) {
+        response.send({ message: "error!" });
+      } else {
+        db.run(`DELETE FROM Articles_Categories WHERE id_article = ?`, idStorie, error => {
+          if (error) {
+            response.send({ message: "error!" });
+          } else {
+            response.send({ message: "success" });
+          }
+        });
+      }
+    });
+  }
+  else{
+    response.send({ message: "fail" });
+  }
 });
 app.post("/stories/edit", (request, response) => {
-  const idStorie = request.body.id;
-  const title = request.body.title;
-  const link = request.body.link;
-  const content = request.body.content;
-  const categories = request.body.categories;
-  const publish = request.body.publish;
-  const timestamp = request.body.timestamp;
-  const style = request.body.style;
-  db.run(`UPDATE Articles SET title = ?, link = ?, content = ?, publish = ?, timestamp = ?, style = ? WHERE id = ?`, [title,link,content,publish,timestamp,style,idStorie], function (error) {
-    if (error) {
-      response.send({ message: "error!" });
-    } else {
-      db.run(`DELETE FROM Articles_Categories WHERE id_article = ?`, idStorie, error => {
-        if (error) {
-          response.send({ message: "error!" });
-        } else {
-          categories.forEach(function(element) {
-            db.run(`INSERT INTO Articles_Categories (id_article,id_category) VALUES (?,?)`, [idStorie,element], error => {
-              if (error) { console.log("error forearch"); } 
+  if (request.session.logged){
+    const idStorie = request.body.id;
+    const title = request.body.title;
+    const link = request.body.link;
+    const content = request.body.content;
+    const categories = request.body.categories;
+    const publish = request.body.publish;
+    const timestamp = request.body.timestamp;
+    const style = request.body.style;
+    db.run(`UPDATE Articles SET title = ?, link = ?, content = ?, publish = ?, timestamp = ?, style = ? WHERE id = ?`, [title,link,content,publish,timestamp,style,idStorie], function (error) {
+      if (error) {
+        response.send({ message: "error!" });
+      } else {
+        db.run(`DELETE FROM Articles_Categories WHERE id_article = ?`, idStorie, error => {
+          if (error) {
+            response.send({ message: "error!" });
+          } else {
+            categories.forEach(function(element) {
+              db.run(`INSERT INTO Articles_Categories (id_article,id_category) VALUES (?,?)`, [idStorie,element], error => {
+                if (error) { console.log("error forearch"); } 
+              });
             });
-          });
-          response.send({ message: "success" });
-        }
-      });
-    }
-  });
+            response.send({ message: "success" });
+          }
+        });
+      }
+    });
+  }
+  else{
+    response.send({ message: "fail" });
+  }
 });
 app.post("/stories/publish", (request, response) => {
-  const idStorie = request.body.id;
-  const publish = request.body.publish;
-  db.run(`UPDATE Articles SET publish = ? WHERE id = ?`, [publish,idStorie], error => {
-    if (error) {
-      response.send({ message: "error!" });
-    } else {
-      response.send({ message: "success" });
-    }
-  });
+  if (request.session.logged){
+    const idStorie = request.body.id;
+    const publish = request.body.publish;
+    db.run(`UPDATE Articles SET publish = ? WHERE id = ?`, [publish,idStorie], error => {
+      if (error) {
+        response.send({ message: "error!" });
+      } else {
+        response.send({ message: "success" });
+      }
+    });
+  }
+  else{
+    response.send({ message: "fail" });
+  }
 });
 app.get("/stories/category/:id", (request, response) => {
   var id_article = request.params.id;
@@ -282,39 +312,54 @@ app.get("/category/:id", (request, response) => {
   });
 });
 app.post("/category/add", (request, response) => {
-  const title = request.body.title;
-  const position = request.body.position;
-  const type = request.body.type;
-  db.run(`INSERT INTO Categories (title,position,type) VALUES (?,?,?)`, [title,position,type], error => {
-    if (error) {
-      response.send({ message: "error!" });
-    } else {
-      response.send({ message: "success" });
-    }
-  });
+  if (request.session.logged){
+    const title = request.body.title;
+    const position = request.body.position;
+    const type = request.body.type;
+    db.run(`INSERT INTO Categories (title,position,type) VALUES (?,?,?)`, [title,position,type], error => {
+      if (error) {
+        response.send({ message: "error!" });
+      } else {
+        response.send({ message: "success" });
+      }
+    });
+  }
+  else{
+    response.send({ message: "fail" });
+  }
 });
 app.post("/category/remove", (request, response) => {
-  const idCategory = request.body.id;
-  db.run(`DELETE FROM Categories WHERE id = ?`, idCategory, error => {
-    if (error) {
-      response.send({ message: "error!" });
-    } else {
-      response.send({ message: "success" });
-    }
-  });
+  if (request.session.logged){
+    const idCategory = request.body.id;
+    db.run(`DELETE FROM Categories WHERE id = ?`, idCategory, error => {
+      if (error) {
+        response.send({ message: "error!" });
+      } else {
+        response.send({ message: "success" });
+      }
+    });
+  }
+  else{
+    response.send({ message: "fail" });
+  }
 });
 app.post("/category/edit", (request, response) => {
-  const idCategory = request.body.id;
-  const title = request.body.title;
-  const position = request.body.position;
-  const type = request.body.type;
-  db.run(`UPDATE Categories SET title = ?, position = ?, type = ? WHERE id = ?`, [title,position,type,idCategory], error => {
-    if (error) {
-      response.send({ message: "error!" });
-    } else {
-      response.send({ message: "success" });
-    }
-  });
+  if (request.session.logged){
+    const idCategory = request.body.id;
+    const title = request.body.title;
+    const position = request.body.position;
+    const type = request.body.type;
+    db.run(`UPDATE Categories SET title = ?, position = ?, type = ? WHERE id = ?`, [title,position,type,idCategory], error => {
+      if (error) {
+        response.send({ message: "error!" });
+      } else {
+        response.send({ message: "success" });
+      }
+    });
+  }
+  else{
+    response.send({ message: "fail" });
+  }
 });
 
 // listen for requests :)
