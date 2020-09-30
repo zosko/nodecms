@@ -88,7 +88,7 @@ function getAdminCategory() {
     $("#category").html("");
     $("#news_category").empty();
     $("#article_category").empty();
-    $("#sort_news").html('<b>CATEGORIES: </b> </button><button data-id="0" class="sort_by">All News</button>');
+    $("#sort_news").html('<b>CATEGORIES: </b><button data-id="0" class="sort_by">All News</button>');
     $(jsonData).each(function(index, el) {
       if (el.id != 1) {
         $("#category").append(('['+ ['','Normal','List'][el.type] +']') + '<button data-id="' + el.id + '" class="edit">Edit</button><button data-id="' + el.id + '" class="remove">Remove</button>' + el.title + "<br />");
