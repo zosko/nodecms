@@ -21,10 +21,10 @@ function getStyle(style) {
 function getFrontMenu() {
   $.get("/category", function(data, status) {
     var jsonData = JSON.parse(data);
-    $("#menu").html('<a href="/">All News</a> |');
+    $("#menu").html('<a style="font-size:18px;" href="/"><b>All News</b></a> |');
     $(jsonData).each(function(index, el) {
       if (el.id != 1) {
-        $("#menu").append('<a href="'+(el.type == 2 ? '/list' : '/page')+ '/' + el.id + '"> ' + el.title + " </a> |");
+        $("#menu").append('&nbsp; <a style="font-size:18px;" href="'+(el.type == 2 ? '/list' : '/page')+ '/' + el.id + '"><b>' + el.title + "</b></a> |");
       }
     });
   });
