@@ -88,12 +88,12 @@ function getAdminCategory() {
     $("#category").html("");
     $("#news_category").empty();
     $("#article_category").empty();
-    $("#sort_news").html('<b>CATEGORIES: </b> <a href="#" data-id="0" class="sort_by">All News</a> |');
+    $("#sort_news").html('<b>CATEGORIES: </b> </button><button data-id="0" class="sort_by">All News</button>');
     $(jsonData).each(function(index, el) {
       if (el.id != 1) {
         $("#category").append(('['+ ['','Normal','List'][el.type] +']') + '<button data-id="' + el.id + '" class="edit">Edit</button><button data-id="' + el.id + '" class="remove">Remove</button>' + el.title + "<br />");
       }
-      $("#sort_news").append('<a href="#" data-id="' + el.id + '" class="sort_by"> ' + el.title + " </a> |");
+      $("#sort_news").append('</button><button data-id="' +el.id +'" class="sort_by">'+ el.title +'</button>');
       $('#news_category').append(el.title + '<input type="checkbox" value="'+ el.id +'" name="news_category[]"> | '); 
       $('#article_category').append(el.title + '<input type="checkbox" value="'+ el.id +'" name="article_category[]"> | '); 
     });
