@@ -62,7 +62,6 @@
     <option value="5">Purple</option>
     </select><br />
     <b>BOLD</b> <input type="checkbox" id="article_style_bold" /><br />
-    <!-- <b>SHOW <input type="radio" name="article_publish" value="1" checked>HIDE<input type="radio" name="article_publish" value="0"><br /> -->
     <input type="submit" value="Add Article">
   </form> 
     <hr />
@@ -76,6 +75,39 @@
         getAdminCategory();
         getAdminStories();
     });
+    function renderAdminStories(jsonData){
+        $("#stories").html("");
+        $(jsonData).each(function(index, el) {
+          if (el.content == null) {
+            var style = $("#stories").append('<button data-id="' +el.id +'" class="publish">' +(el.publish ? "Hide" : "Show") +'</button><button data-id="' +el.id +'" class="edit">Edit</button><button data-id="' +el.id +'" class="remove">Remove</button><a ' +getStyle(el.style) +' href="' +el.link +'" target="_blank">' +el.title +"</a><br />");
+          } else {
+            $("#stories").append('<button data-id="' +el.id +'" class="publish">' +(el.publish ? "Hide" : "Show") +'</button><button data-id="' +el.id +'" class="edit">Edit</button><button data-id="' +el.id +'" class="remove">Remove</button><a ' +getStyle(el.style) +' href="article/' +el.id +'" target="_blank">' +el.title +"</a><br />");
+          }
+        });
+    }
+    function getAdminStories() {
+      $.get("/stories/admin", function(data,status) {
+        var jsonData = JSON.parse(data);
+        renderAdminStories(jsonData);
+      });
+    }
+    function getAdminCategory() {
+      $.get("/category/admin", function(data, status) {
+        var jsonData = JSON.parse(data);
+        $("#category").html("");
+        $("#news_category").empty();
+        $("#article_category").empty();
+        $("#sort_news").html('<b>CATEGORIES: </b><button data-id="0" class="sort_by">All News</button>');
+        $(jsonData).each(function(index, el) {
+          if (el.id != 1) {
+            $("#category").append(('['+ ['','Normal','List'][el.type] +']') + '<button data-id="' +el.id +'" class="publish">' +(el.publish ? "Hide" : "Show") +'</button><button data-id="' + el.id + '" class="edit">Edit</button><button data-id="' + el.id + '" class="remove">Remove</button>' + el.title + "<br />");
+          }
+          $("#sort_news").append('</button><button data-id="' +el.id +'" class="sort_by">'+ el.title +'</button>');
+          $('#news_category').append(el.title + '<input type="checkbox" value="'+ el.id +'" name="news_category[]"> | '); 
+          $('#article_category').append(el.title + '<input type="checkbox" value="'+ el.id +'" name="article_category[]"> | '); 
+        });
+      });
+    }
     $("#form_upload").submit(function(e) {
         e.preventDefault();
         var fileToUpload = $('#form_upload_file').prop('files')[0];
@@ -138,14 +170,13 @@
             title: $('#article_title').val(),
             content: $('#article_content').val(),
             category: checked_category,
-            publish: 1, //$("input[name='article_publish']:checked").val(),
+            publish: 1,
             timestamp: Math.round(+new Date() / 1000),
             style: $('#article_style').val() + ($('#article_style_bold').is(":checked") ? 1 : 0)
         };
         $.post("/stories/add", jsonPost, function(result) {
             $('#article_title').val('');
             $('#article_content').val('');
-            // $("input[name=article_publish]").val(['1']);
             getAdminStories();
         });
     });
@@ -194,6 +225,17 @@
     $('#category').on('click', '.edit', function() {
         var categoryID = $(this).data('id');
         document.location.href = '/edit/category/' + categoryID;
+    });
+    $('#category').on('click', '.publish', function() {
+        var button = $(this);
+        var categoryID = button.data('id');
+        var publish = button.text() == "Show" ? 1 : 0;
+        $.post("/category/publish", {
+            id: categoryID,
+            publish: publish
+        }, function(result) {
+            button.text(publish ? "Hide" : "Show");
+        });
     });
     </script>
     
