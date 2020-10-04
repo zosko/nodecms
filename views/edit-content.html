@@ -14,7 +14,6 @@
   <body>
     <center><b>EDIT ARTICLE</b></center><br />
   <form id="form_storie" action="">
-    <b>ID:</b> <input type="text" name="storie_id" id="storie_id" disabled><br />
     <b>TITLE:</b> <input type="text" name="storie_title" id="storie_title"><br />
     <b>LINK:</b> <input type="text" name="storie_link" id="storie_link"><br />
     <b>CONTENT:</b> <textarea id="storie_content" name="storie_content" rows="4" cols="50"></textarea><br />
@@ -28,21 +27,19 @@
     <option value="5">Purple</option>
     </select><br />
     <b>BOLD</b><input type="checkbox" name="storie_style_bold" id="storie_style_bold" /><br />
-    <b>STORY</b> show<input type="radio" name="storie_publish" value="1" checked>hide<input type="radio" name="storie_publish" value="0"><br />
     <button onclick="window.history.back()">Back</button> <input type="submit" value="Save">
   </form> 
     <script>
       var isStory = false;
+      var idArticle = 0;
       $(document).ready(function() {
-        var idArticle = window.location.pathname.split("/").pop();
+        idArticle = window.location.pathname.split("/").pop();
         $.post("/article/" + idArticle, function(data, status){
           var jsonData = JSON.parse(data);
-          $('#storie_id').val(jsonData[0].id);
           $('#storie_title').val(jsonData[0].title);
           $('#storie_link').val(jsonData[0].link);
           $('#storie_content').html(jsonData[0].content);
           $('#storie_date').val(getFormatDate(jsonData[0].timestamp));
-          $("input[name=storie_publish]").val([jsonData[0].publish]);
           
           var color = parseInt(jsonData[0].style / 10,10); 
           var bold = jsonData[0].style % 10;
@@ -63,6 +60,15 @@
           getCategoriesForArticle(idArticle);
         });
       });
+      function getAdminCategory() {
+        $.get("/category/admin", function(data, status) {
+          var jsonData = JSON.parse(data);
+          $("#article_category").empty();
+          $(jsonData).each(function(index, el) {
+            $('#article_category').append(el.title + '<input type="checkbox" value="'+ el.id +'" name="article_category[]"> | '); 
+          });
+        });
+      }
       function getCategoriesForArticle(id_article){
         $.get("/stories/category/"+id_article,function(result){
           var jsonData = JSON.parse(result);
@@ -84,11 +90,10 @@
             checked_category.push(parseInt($(this).val()));
         });
 
-        var jsonPost = {id: $('#storie_id').val(),
+        var jsonPost = {id: idArticle,
                         title: $('#storie_title').val(),
                         link: isStory ? undefined : $('#storie_link').val(),
                         content:isStory ? $('#storie_content').val() : undefined,
-                        publish:$("input[name='storie_publish']:checked").val(),
                         timestamp:getTimestamp($('#storie_date').val()),
                         categories: checked_category,
                         style:$('#storie_style').val() + ($('#storie_style_bold').is(":checked") ? 1 : 0)
