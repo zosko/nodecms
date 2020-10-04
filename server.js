@@ -19,8 +19,8 @@ const db = new sqlite3.Database(dbFile);
 // if ./.data/sqlite.db does not exist, create it, otherwise print records to console
 db.serialize(() => {
   if (!exists) {
-    db.run("CREATE TABLE Categories (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, position INTEGER, type INTEGER)");
-    db.run("INSERT INTO Categories (title,position,type) VALUES ('No Category',0,1)");
+    db.run("CREATE TABLE Categories (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, position INTEGER, type INTEGER, publish INTEGER)");
+    db.run("INSERT INTO Categories (title,position,type,publish) VALUES ('No Category',0,1,1)");
     db.run("CREATE TABLE Articles (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, link TEXT, content TEXT, publish INTEGER, timestamp INTEGER, style INTEGER)");
     db.run("CREATE TABLE Articles_Categories (id INTEGER PRIMARY KEY AUTOINCREMENT, id_article INTEGER, id_category INTEGER)");
     console.log("New tables created!");
@@ -248,10 +248,9 @@ app.post("/stories/edit", (request, response) => {
     const link = request.body.link;
     const content = request.body.content;
     const categories = request.body.categories;
-    const publish = request.body.publish;
     const timestamp = request.body.timestamp;
     const style = request.body.style;
-    db.run(`UPDATE Articles SET title = ?, link = ?, content = ?, publish = ?, timestamp = ?, style = ? WHERE id = ?`, [title,link,content,publish,timestamp,style,idStorie], function (error) {
+    db.run(`UPDATE Articles SET title = ?, link = ?, content = ?, timestamp = ?, style = ? WHERE id = ?`, [title,link,content,timestamp,style,idStorie], function (error) {
       if (error) {
         response.send({ message: "error!" });
       } else {
@@ -300,8 +299,13 @@ app.get("/stories/category/:id", (request, response) => {
 /////////
 //  CATEGORIES API
 /////////
-app.get("/category", (request, response) => {
+app.get("/category/admin", (request, response) => {
   db.all("SELECT * from Categories ORDER BY position ASC", (err, rows) => {
+    response.send(JSON.stringify(rows));
+  });
+});
+app.get("/category", (request, response) => {
+  db.all("SELECT * from Categories WHERE publish = 1 ORDER BY position ASC", (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -332,6 +336,22 @@ app.post("/category/remove", (request, response) => {
   if (request.session.logged){
     const idCategory = request.body.id;
     db.run(`DELETE FROM Categories WHERE id = ?`, idCategory, error => {
+      if (error) {
+        response.send({ message: "error!" });
+      } else {
+        response.send({ message: "success" });
+      }
+    });
+  }
+  else{
+    response.send({ message: "fail" });
+  }
+});
+app.post("/category/publish", (request, response) => {
+  if (request.session.logged){
+    const idCategory = request.body.id;
+    const publish = request.body.publish;
+    db.run(`UPDATE Categories SET publish = ? WHERE id = ?`, [publish,idCategory], error => {
       if (error) {
         response.send({ message: "error!" });
       } else {
