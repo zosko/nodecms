@@ -12,23 +12,22 @@
     <script src="/app.js"></script>
   </head>
   <body>
-    <b>EDIT CATEGORY:</b><br />
+    <center><b>EDIT CATEGORY</b></center><br />
   <form id="form_category" action="">
-    ID: <input type="text" name="category_id" id="category_id" disabled>
-    title: <input type="text" name="category_title" id="category_title">
-    position: <input type="text" name="category_position" id="category_position">
-    Type: <select id="category_type">
+    <b>TITLE:</b><input type="text" name="category_title" id="category_title"><br />
+    <b>POSITION:</b><input type="text" name="category_position" id="category_position"><br />
+    <b>TYPE:</b><select id="category_type">
     <option value="1">Normal</option>
     <option value="2">List</option>
-    </select>
+    </select><br />
     <button onclick="window.history.back()">Back</button> <input type="submit" value="Save"><br />
   </form>
     <script>
+      var idCategory = 0;
       $(document).ready(function() {
-        var idCategory = window.location.pathname.split("/").pop();
+        idCategory = window.location.pathname.split("/").pop();
         $.get("/category/" + idCategory, function(data, status){
           var jsonData = JSON.parse(data);
-          $('#category_id').val(jsonData[0].id);
           $('#category_title').val(jsonData[0].title);
           $('#category_position').val(jsonData[0].position);
           $("#category_type").val(jsonData[0].type);
@@ -36,7 +35,7 @@
       });
       $("#form_category").submit(function(e){
         e.preventDefault();
-        var jsonPost = {id: $('#category_id').val(),
+        var jsonPost = {id: idCategory,
                         title: $('#category_title').val(),
                         position:$('#category_position').val(),
                         type:$('#category_type').val()
