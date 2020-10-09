@@ -135,6 +135,9 @@ app.get("/edit/category/:id", (request, response) => {
 app.get("/article/:id", (request, response) => {
   response.sendFile(`${__dirname}/views/article.html`);
 });
+app.get("/a/:title/:id", (request, response) => {
+  response.sendFile(`${__dirname}/views/article.html`);
+});
 app.post("/article/:id", (request, response) => {
   var idStorie = request.params.id;
   db.all("SELECT * from Articles WHERE id == ?", idStorie , (err, rows) => {
@@ -148,6 +151,9 @@ app.post("/article/:id", (request, response) => {
 app.get("/page/:id", (request, response) => {
   response.sendFile(`${__dirname}/views/page.html`);
 });
+app.get("/p/:title/:id", (request, response) => {
+  response.sendFile(`${__dirname}/views/page.html`);
+});
 app.post("/page/:id", (request, response) => {
   var idCategory = request.params.id;
   db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
@@ -159,6 +165,9 @@ app.post("/page/:id", (request, response) => {
 //  LIST VIEWS
 ////////
 app.get("/list/:id", (request, response) => {
+  response.sendFile(`${__dirname}/views/list.html`);
+});
+app.get("/l/:title/:id", (request, response) => {
   response.sendFile(`${__dirname}/views/list.html`);
 });
 app.post("/list/:id", (request, response) => {
