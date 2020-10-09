@@ -18,13 +18,18 @@ function getStyle(style) {
   };
   return ("style=color:" + colors[color] + ";font-weight:" + (bold == 1 ? "bold" : "normal") + ";");
 }
+function refine(title){
+  var refined = title.replace(/[^\w\s]/gi, '');
+  refined = refined.replace(/[^A-Z0-9]/ig, "-");
+  return refined.toLowerCase();
+}
 function getFrontMenu() {
   $.get("/category", function(data, status) {
     var jsonData = JSON.parse(data);
     $("#menu").html('<a style="font-size:18px;" href="/"><b>Latest</b></a> |');
     $(jsonData).each(function(index, el) {
       if (el.id != 1) {
-        $("#menu").append('&nbsp; <a style="font-size:18px;" href="'+(el.type == 2 ? '/list' : '/page')+ '/' + el.id + '"><b>' + el.title + "</b></a> |");
+        $("#menu").append('&nbsp; <a style="font-size:18px;" href="'+(el.type == 2 ? '/l' : '/p')+ '/' + refine(el.title) + '/' + el.id + '"><b>' + el.title + "</b></a> |");
       }
     });
   });
@@ -32,7 +37,7 @@ function getFrontMenu() {
 function renderFrontPageStories(jsonData){
     $("#stories").html("");
     $(jsonData).each(function(index, el) {
-      $("#stories").append("<a " + getStyle(el.style) + ' ' + (el.content == null ? 'href="' + el.link + '" target="_blank"' : 'href="/article/' + el.id) + '">' + el.title + '</a><div class="verticalgap" style="height:10px"></div>');
+      $("#stories").append("<a " + getStyle(el.style) + ' ' + (el.content == null ? 'href="' + el.link + '" target="_blank"' : 'href="/a/' + refine(el.title) + '/' + el.id) + '">' + el.title + '</a><div class="verticalgap" style="height:10px"></div>');
     });
 }
 function getFrontPageStories() {
