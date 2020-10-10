@@ -95,7 +95,7 @@ app.get("/admin", (request, response) => {
 ////////
 app.post("/login", (request, response) => {
   const password = request.body.password;
-  if (password == "Ufycnvvf32fEsKJH") {
+  if (password == "password") {
     request.session.logged = true;
   }
   response.send({message: "ok"});
@@ -156,7 +156,7 @@ app.get("/p/:title/:id", (request, response) => {
 });
 app.post("/page/:id", (request, response) => {
   var idCategory = request.params.id;
-  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles.publish = 1 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -172,7 +172,7 @@ app.get("/l/:title/:id", (request, response) => {
 });
 app.post("/list/:id", (request, response) => {
   var idCategory = request.params.id;
-  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles.publish = 1 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -198,7 +198,7 @@ app.get("/stories", (request, response) => {
 });
 app.get("/stories/:category", (request, response) => {
   var category = request.params.category;
-  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles_Categories.id_category = ? AND Articles.publish = 1 ORDER BY Articles.timestamp DESC",category, (err, rows) => {
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles.publish = 1 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC",category, (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
