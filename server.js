@@ -140,7 +140,7 @@ app.get("/a/:title/:id", (request, response) => {
 });
 app.post("/article/:id", (request, response) => {
   var idStorie = request.params.id;
-  db.all("SELECT * from Articles WHERE id == ?", idStorie , (err, rows) => {
+  db.all("SELECT * from Articles WHERE NOT publish = 0 AND id == ?", idStorie , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -156,7 +156,7 @@ app.get("/p/:title/:id", (request, response) => {
 });
 app.post("/page/:id", (request, response) => {
   var idCategory = request.params.id;
-  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles.publish = 1 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE NOT Articles.publish = 0 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -172,7 +172,7 @@ app.get("/l/:title/:id", (request, response) => {
 });
 app.post("/list/:id", (request, response) => {
   var idCategory = request.params.id;
-  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles.publish = 1 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE NOT Articles.publish = 0 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -193,12 +193,6 @@ app.get("/stories/:category/admin", (request, response) => {
 });
 app.get("/stories", (request, response) => {
   db.all("SELECT * from Articles WHERE publish = 1 ORDER BY timestamp DESC", (err, rows) => {
-    response.send(JSON.stringify(rows));
-  });
-});
-app.get("/stories/:category", (request, response) => {
-  var category = request.params.category;
-  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE Articles.publish = 1 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC",category, (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
