@@ -78,11 +78,16 @@
     function renderAdminStories(jsonData){
         $("#stories").html("");
         $(jsonData).each(function(index, el) {
-          if (el.content == null) {
-            var style = $("#stories").append('<button data-id="' +el.id +'" class="publish">' +(el.publish ? "Hide" : "Show") +'</button><button data-id="' +el.id +'" class="edit">Edit</button><button data-id="' +el.id +'" class="remove">Remove</button><a ' +getStyle(el.style) +' href="' +el.link +'" target="_blank">' +el.title +"</a><br />");
-          } else {
-            $("#stories").append('<button data-id="' +el.id +'" class="publish">' +(el.publish ? "Hide" : "Show") +'</button><button data-id="' +el.id +'" class="edit">Edit</button><button data-id="' +el.id +'" class="remove">Remove</button><a ' +getStyle(el.style) +' href="article/' +el.id +'" target="_blank">' +el.title +"</a><br />");
-          }
+          $("#stories").append(
+            '<select data-id="' +el.id +'" class="publish">' +
+            '<option value="0" '+ (el.publish == 0 ? "Selected" : "") +'>Hide</option>' +
+            '<option value="1" '+ (el.publish == 1 ? "Selected" : "") +'>Show</option>' +
+            '<option value="2" '+ (el.publish == 2 ? "Selected" : "") +'>Category</option>' +
+            '</select>' + 
+            '<button data-id="' +el.id +'" class="edit">Edit</button>' +
+            '<button data-id="' +el.id +'" class="remove">Remove</button>' + 
+            '<a ' + getStyle(el.style) + ' ' + (el.content == null ? 'href="' + el.link + '" target="_blank"' : 'href="/article/' + el.id) + '">' + el.title + '</a>' +
+            '<br />');
         });
     }
     function getAdminStories() {
@@ -100,7 +105,12 @@
         $("#sort_news").html('<b>CATEGORIES: </b><button data-id="0" class="sort_by">All News</button>');
         $(jsonData).each(function(index, el) {
           if (el.id != 1) {
-            $("#category").append(('['+ ['','Normal','List'][el.type] +']') + '<button data-id="' +el.id +'" class="publish">' +(el.publish ? "Hide" : "Show") +'</button><button data-id="' + el.id + '" class="edit">Edit</button><button data-id="' + el.id + '" class="remove">Remove</button>' + el.title + "<br />");
+            $("#category").append(
+                ('['+ ['','Normal','List'][el.type] +']') + 
+                '<button data-id="' +el.id +'" class="publish">' +(el.publish ? "Hide" : "Show") +'</button>' +
+                '<button data-id="' + el.id + '" class="edit">Edit</button>' +
+                '<button data-id="' + el.id + '" class="remove">Remove</button>' + el.title +
+                '<br />');
           }
           $("#sort_news").append('</button><button data-id="' +el.id +'" class="sort_by">'+ el.title +'</button>');
           $('#news_category').append(el.title + '<input type="checkbox" value="'+ el.id +'" name="news_category[]"> | '); 
@@ -192,10 +202,9 @@
         var storieID = $(this).data('id');
         document.location.href = '/edit/story/' + storieID;
     });
-    $('#stories').on('click', '.publish', function() {
-        var button = $(this);
-        var storieID = button.data('id');
-        var publish = button.text() == "Show" ? 1 : 0;
+    $('#stories').on('change', '.publish', function() {
+        var storieID = $(this).data('id');
+        var publish = $(this).val();
         $.post("/stories/publish", {
             id: storieID,
             publish: publish
