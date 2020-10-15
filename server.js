@@ -154,9 +154,10 @@ app.get("/page/:id", (request, response) => {
 app.get("/p/:title/:id", (request, response) => {
   response.sendFile(`${__dirname}/views/page.html`);
 });
-app.post("/page/:id", (request, response) => {
+app.post("/page/:id/page/:page", (request, response) => {
   var idCategory = request.params.id;
-  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE NOT Articles.publish = 0 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
+  var page = request.params.page * 50;
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE NOT Articles.publish = 0 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC LIMIT 50 OFFSET ? ", [idCategory,page] , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -170,9 +171,10 @@ app.get("/list/:id", (request, response) => {
 app.get("/l/:title/:id", (request, response) => {
   response.sendFile(`${__dirname}/views/list.html`);
 });
-app.post("/list/:id", (request, response) => {
+app.post("/list/:id/page/:page", (request, response) => {
   var idCategory = request.params.id;
-  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE NOT Articles.publish = 0 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC", idCategory , (err, rows) => {
+  var page = request.params.page * 10;
+  db.all("SELECT Articles.* from Articles JOIN Articles_Categories ON Articles.id = Articles_Categories.id_article WHERE NOT Articles.publish = 0 AND Articles_Categories.id_category = ? ORDER BY Articles.timestamp DESC LIMIT 10 OFFSET ? ", [idCategory,page] , (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
@@ -191,8 +193,9 @@ app.get("/stories/:category/admin", (request, response) => {
     response.send(JSON.stringify(rows));
   });
 });
-app.get("/stories", (request, response) => {
-  db.all("SELECT * from Articles WHERE publish = 1 ORDER BY timestamp DESC", (err, rows) => {
+app.get("/stories/page/:page", (request, response) => {
+  var page = request.params.page * 50;
+  db.all("SELECT * from Articles WHERE publish = 1 ORDER BY timestamp DESC LIMIT 50 OFFSET ? ",page, (err, rows) => {
     response.send(JSON.stringify(rows));
   });
 });
