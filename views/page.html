@@ -17,15 +17,33 @@
     <div id="menu"></div>
     <hr />
     <div id="stories"></div>
+    <hr />
+    <button id="loadMore"><h2>OLDER POSTS</h2></button>
     <script>
       $(document).ready(function() {
+        var page = 0;
         getFrontMenu();
         
         var idCategory = window.location.pathname.split("/").pop();
-        $.post("/page/" + idCategory, function(data, status){
+        $.post("/page/" + idCategory + "/page/" + page, function(data, status){
           var jsonData = JSON.parse(data);
           renderFrontPageStories(jsonData);
+          if (jsonData.length < 50) {
+              $('#loadMore').hide();
+            }
         });
+
+        $('#loadMore').on('click', function() {
+          page++;
+          $.post("/page/" + idCategory + "/page/" + page, function(data, status){
+            var jsonData = JSON.parse(data);
+            renderFrontPageStories(jsonData);
+            if (jsonData.length < 50) {
+              $('#loadMore').hide();
+            }
+          });
+        });
+
       });
     </script>
   </body>
