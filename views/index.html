@@ -17,10 +17,35 @@
     <div id="menu"></div>
     <hr />
     <div id="stories"></div>
+    <hr />
+    <button id="loadMore"><h2>OLDER POSTS</h2></button>
     <script>
+       function getFrontPageStories() {
+        $.get("/stories/page/0", function(data, status) {
+          var jsonData = JSON.parse(data);
+          renderFrontPageStories(jsonData);
+          if (jsonData.length < 50) {
+              $('#loadMore').hide();
+            }
+        });
+      }
       $(document).ready(function() {
+        var page = 0;
         getFrontMenu();
         getFrontPageStories();
+
+
+        $('#loadMore').on('click', function() {
+          page++;
+          $.get("/stories/page/" + page, function(data, status) {
+            var jsonData = JSON.parse(data);
+            renderFrontPageStories(jsonData);
+            if (jsonData.length < 50) {
+              $('#loadMore').hide();
+            }
+          });
+        });
+
       });
     </script>
   </body>
