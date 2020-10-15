@@ -35,16 +35,9 @@ function getFrontMenu() {
   });
 }
 function renderFrontPageStories(jsonData){
-    $("#stories").html("");
     $(jsonData).each(function(index, el) {
       $("#stories").append("<a " + getStyle(el.style) + ' ' + (el.content == null ? 'href="' + el.link + '" target="_blank"' : 'href="/a/' + refine(el.title) + '/' + el.id) + '">' + el.title + '</a><div class="verticalgap" style="height:10px"></div>');
     });
-}
-function getFrontPageStories() {
-  $.get("/stories", function(data, status) {
-    var jsonData = JSON.parse(data);
-    renderFrontPageStories(jsonData);
-  });
 }
 function getFormatDate(timestamp) {
   var date = new Date(timestamp * 1000);
