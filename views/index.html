@@ -18,35 +18,33 @@
     <hr />
     <div id="stories"></div>
     <hr />
-    <button id="loadMore"><h2>OLDER POSTS</h2></button>
     <script>
-       function getFrontPageStories() {
+      function getFrontPageStories() {
         $.get("/stories/page/0", function(data, status) {
           var jsonData = JSON.parse(data);
           renderFrontPageStories(jsonData);
-          if (jsonData.length < 50) {
-              $('#loadMore').hide();
-            }
         });
       }
       $(document).ready(function() {
+        var loadMore = true;
         var page = 0;
         getFrontMenu();
         getFrontPageStories();
 
-
-        $('#loadMore').on('click', function() {
-          page++;
-          $.get("/stories/page/" + page, function(data, status) {
-            var jsonData = JSON.parse(data);
-            renderFrontPageStories(jsonData);
-            if (jsonData.length < 50) {
-              $('#loadMore').hide();
-            }
-          });
+        $(window).scroll(function () { 
+           if($(window).scrollTop() >= $(document).height() - $(window).height() - 10 && loadMore) {
+              page++;
+              loadMore = false;
+              $.get("/stories/page/" + page, function(data, status) {
+                var jsonData = JSON.parse(data);
+                renderFrontPageStories(jsonData);
+                loadMore = jsonData.length == 50;
+              });
+           }
         });
 
       });
+
     </script>
   </body>
 </html>
