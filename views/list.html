@@ -17,32 +17,33 @@
     <div id="menu"></div>
     <hr />
     <div id="articles"></div>
-    <button id="loadMore"><h2>OLDER POSTS</h2></button>
     <script>
       $(document).ready(function() {
         getFrontMenu();
         var page = 0;
+        var loadMore = true;
+
         var idCategory = window.location.pathname.split("/").pop();
         $.post("/list/" + idCategory + "/page/" + page, function(data, status){
           var jsonData = JSON.parse(data);
-          $("#articles").html('');
           $(jsonData).each(function(index, el) {
             $("#articles").append('<p>'+(el.content ? '<h1>'+ el.title +'</h1>' : '' ) + (el.content ? el.content : '<a href="'+el.link+'" target="_blank">'+el.title+'</a>')+'</p><hr />');
           });
-          if (jsonData.length < 50) {
-            $('#loadMore').hide();
-          }
+          loadMore = jsonData.length == 10;
         });
 
-        $('#loadMore').on('click', function() {
-          page++;
-          $.post("/list/" + idCategory + "/page/" + page, function(data, status){
-            var jsonData = JSON.parse(data);
-            renderFrontPageStories(jsonData);
-            if (jsonData.length < 50) {
-              $('#loadMore').hide();
-            }
-          });
+        $(window).scroll(function () { 
+           if($(window).scrollTop() >= $(document).height() - $(window).height() - 10 && loadMore) {
+              page++;
+              loadMore = false;
+              $.post("/list/" + idCategory + "/page/" + page, function(data, status){
+                var jsonData = JSON.parse(data);
+                $(jsonData).each(function(index, el) {
+                  $("#articles").append('<p>'+(el.content ? '<h1>'+ el.title +'</h1>' : '' ) + (el.content ? el.content : '<a href="'+el.link+'" target="_blank">'+el.title+'</a>')+'</p><hr />');
+                });
+                loadMore = jsonData.length == 10;
+              });
+           }
         });
 
       });
