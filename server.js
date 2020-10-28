@@ -7,7 +7,7 @@ const app = express();
 const fs = require("fs");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(session({secret: 'ssshhhhh tornado balance jogurt medal bamblbee sinalco', saveUninitialized: true, resave: true}));
+app.use(session({secret: 'ssshhhhh', saveUninitialized: true, resave: true}));
 app.use(express.static("public"));
 
 // init sqlite db
