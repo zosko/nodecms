@@ -15,7 +15,8 @@
     <hr />
     <div id="menu"></div>
     <hr />
-    <b><div id="article_title"></div></b><br />
+    <b><h1><div id="article_title"></div></h1></b>
+    <b><div id="article_date"></div></b><br />
     <div id="article_content"></div>
     <script>
       $(document).ready(function() {
@@ -26,6 +27,7 @@
           var jsonData = JSON.parse(data);
           $('#article_title').html(jsonData[0].title);
           $('#article_content').html(jsonData[0].content);
+          $('#article_date').html(getFormatDate(jsonData[0].timestamp));
         });
       });
       
